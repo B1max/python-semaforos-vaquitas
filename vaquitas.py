@@ -2,50 +2,25 @@ import os
 import random
 import time
 import threading
+from animales import Animal
+from puentes import Puente
 
 inicioPuente = 10
 largoPuente = 20
-semaforo = threading.Semaphore(14)
-semCruzar = threading.Semaphore(2)
-class Puente():
-  inicio = 0
-  largo = 0
-  def __init__(self,inicio,largo):
-    self.inicio = inicio
-    self.largo = largo
-  def dibujar(self):
-    print(' ' * self.inicio + '=' * self.largo)
-class Vaca(threading.Thread):
-  def __init__(self):
-    super().__init__()
-    self.posicion = 0
-    self.velocidad = random.uniform(0.1, 0.5)
-    # self.velocidad = 0.0001
-  def avanzar(self):
-    time.sleep(self.velocidad)
-    self.posicion += 1
-
-  def dibujar(self):
-    print(' ' * self.posicion + "🐮")
-
-  def run(self):
-    while(True):
-      if self.posicion < inicioPuente:
-        semaforo.acquire()
-        try:
-          self.avanzar()
-        finally:
-          semaforo.release()
-      else:
-        while self.posicion < inicioPuente+largoPuente:     
-          semCruzar.acquire()
-          try:
-            self.avanzar()
-          finally:
-            semCruzar.release()
+vacasPorPuente = 2
+totalVacas = 5
+semVacasPorPuente = threading.Semaphore(vacasPorPuente)
+semVacasAntesDelPuente = threading.Semaphore(totalVacas)
 vacas = []
-for i in range(7):
-  v = Vaca()
+listaDePuentes = []
+
+listaDePuentes.append(Puente(0,11,24))
+listaDePuentes.append(Puente(1,11,24))
+    
+for i in range(totalVacas):
+  # v = Vaca(semVacasPorPuente,semVacasAntesDelPuente,ListaDePuentes)
+  # v = Vaca(semVacasPorPuente,semVacasAntesDelPuente,[Puente(0,11,24),Puente(0,11,24)])
+  v = Animal(semVacasPorPuente,semVacasAntesDelPuente,listaDePuentes,0,'>',1)
   vacas.append(v)
   v.start()
 
@@ -53,15 +28,17 @@ def cls():
   os.system('cls' if os.name=='nt' else 'clear')
 
 def dibujarPuente():
-  print(' ' * inicioPuente + '=' * largoPuente + ' ' * inicioPuente + '=' * largoPuente)
+  dib =''
+  for puente in listaDePuentes:
+    dib+=(' ' * puente.getInicio() + 'm' * puente.getLargo())
+  print(dib)
 
-puente1 = Puente(11,24)
 while(True):
   cls()
-  print('Apretá Ctrl + C varias veces para salir...')
+  print(f'Apretá Ctrl + C varias veces para salir...puentes ={len(listaDePuentes)}')
   print()
-  puente1.dibujar()
+  dibujarPuente()
   for v in vacas:
     v.dibujar()
-  puente1.dibujar()
+  dibujarPuente()
   time.sleep(0.2)
