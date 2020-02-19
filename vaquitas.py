@@ -7,8 +7,8 @@ from puentes import Puente
 
 inicioPuente = 10
 largoPuente = 20
-vacasPorPuente = 2
-totalVacas = 5
+vacasPorPuente = 1
+totalVacas = 4
 semVacasPorPuente = threading.Semaphore(vacasPorPuente)
 semVacasAntesDelPuente = threading.Semaphore(totalVacas)
 vacas = []
@@ -17,11 +17,15 @@ listaDePuentes = []
 listaDePuentes.append(Puente(0,11,24))
 listaDePuentes.append(Puente(1,11,24))
     
-for i in range(totalVacas):
+vacas.append(Animal(semVacasPorPuente,semVacasAntesDelPuente,listaDePuentes,0,'>',1))
+vacas.append(Animal(semVacasPorPuente,semVacasAntesDelPuente,listaDePuentes,70,'<',1))
+vacas.append(Animal(semVacasPorPuente,semVacasAntesDelPuente,listaDePuentes,0,'>',1))
+vacas.append(Animal(semVacasPorPuente,semVacasAntesDelPuente,listaDePuentes,70,'<',1))
+
+  # vacas.append(v)
+for v in vacas:
   # v = Vaca(semVacasPorPuente,semVacasAntesDelPuente,ListaDePuentes)
   # v = Vaca(semVacasPorPuente,semVacasAntesDelPuente,[Puente(0,11,24),Puente(0,11,24)])
-  v = Animal(semVacasPorPuente,semVacasAntesDelPuente,listaDePuentes,0,'>',1)
-  vacas.append(v)
   v.start()
 
 def cls():

@@ -12,6 +12,7 @@ class Animal(threading.Thread):
   indexPuente = 0
   direccion = '>'
   velocidad = 0.1
+  test = 'no hice nada'
   def __init__(self,semaCruzar,semAntesP,puentes,posInicial,direccion,vel):
     super().__init__()
     self.posicion = posInicial
@@ -19,8 +20,15 @@ class Animal(threading.Thread):
     self.semaforoCruzar = semaCruzar
     self.myPuentes = puentes
     self.semaforoAntesP = semAntesP
-    self.direccion = direccion
     self.velocidad = vel
+    self.direccion = direccion
+    self.inicirPos(direccion)
+  def inicirPos(self, dir):
+    if self.direccion == '<':
+      self.posicion = self.medirMaximoEnPuente()
+      self.test += 'set'
+    else:
+      self.direccion = dir
 
   def avanzar(self):
     # time.sleep(self.velocidad)
@@ -40,7 +48,7 @@ class Animal(threading.Thread):
       self.semaforoCruzar.release()
 
   def dibujar(self):
-    print(' ' * self.posicion + "🐮 " + str(self.idDePUenteActual) +'base'+str(self.posBase)+'index'+str(self.indexPuente)+'posB'+str(self.posBase))
+    print(' ' * self.posicion + "🐮 " + str(self.idDePUenteActual) +'base'+str(self.posBase)+'index'+str(self.indexPuente)+'posB'+str(self.posBase)+'test='+self.test)
   def acercarAinicio(self,inicioPuente):
     self.semaforoAntesP.acquire()
     try:
@@ -51,9 +59,9 @@ class Animal(threading.Thread):
     finally:
       self.semaforoAntesP.release()
   def cruzarPuente(self,finPuente):
-    while self.posicion < finPuente and not (self.posicion > self.medirMaximoEnPuente()):
       self.semaforoCruzar.acquire()
       try:
+        while self.posicion < finPuente and not (self.posicion > self.medirMaximoEnPuente()):
           self.avanzar()
       finally:
         self.semaforoCruzar.release()
@@ -61,17 +69,17 @@ class Animal(threading.Thread):
   def acercarAinicioInverso(self,inicioPuente):
     self.semaforoAntesP.acquire()
     try:
-      for i in range(inicioPuente):
-        if self.posicion>inicioPuente:
-          self.retroceder()
-          self.final-=1
+      # for i in range(inicioPuente):
+      while self.posicion>inicioPuente:
+        self.retroceder()
+        # self.final-=1
     finally:
       self.semaforoAntesP.release()
   def cruzarPuenteInverso(self,iniPuente):
-    while self.posicion > iniPuente:
       self.semaforoCruzar.acquire()
       try:
-        self.retroceder()
+        while self.posicion > iniPuente:
+          self.retroceder()
       finally:
         self.semaforoCruzar.release()
   def medirMaximoEnPuente(self):
@@ -81,22 +89,25 @@ class Animal(threading.Thread):
     return max
   def run(self):
     while(True):
-      try:
+      # try:
+      if self.direccion == '>':
         self.posBase = 0
         for puenteActual in self.myPuentes:
-          if self.posicion < self.medirMaximoEnPuente():
-            # self.idDePUenteActual = self.myPuentes[self.indexPuente].getId()
+          if self.posicion < self.medirMaximoEnPuente() and self.direccion == '>':
             self.acercarAinicio(self.posBase+puenteActual.getInicio())
             self.cruzarPuente(self.posBase+puenteActual.getInicio()+puenteActual.getLargo())
             self.posBase+=puenteActual.getInicio()+puenteActual.getLargo()
-            # self.indexPuente+=1
             self.indexPuente=puenteActual.getId()
 
-        for puenteActual in self.myPuentes.reverse():
+      if self.direccion == '<':
+        self.test = 'inverso'
+        self.myPuentes.reverse()
+        for puenteActual2 in self.myPuentes:
           if self.posicion > 0:
-            self.cruzarPuenteInverso(self.posBase-puenteActual.getLargo())
-            self.acercarAinicioInverso(self.posBase-puenteActual.getLargo()-puenteActual.getInicio())
-            self.posBase-=puenteActual.getInicio()+puenteActual.getLargo()
-            self.indexPuente=puenteActual.getId()
-      except:
-        self.final = True
+            self.test = 'Soy inverso2'+self.direccion
+            self.cruzarPuenteInverso(self.posBase-puenteActual2.getLargo())
+            self.acercarAinicioInverso(self.posBase-puenteActual2.getLargo()-puenteActual2.getInicio())
+            self.posBase-=puenteActual2.getInicio()+puenteActual2.getLargo()
+            self.indexPuente=puenteActual2.getId()
+      # except:
+      #     self.final = True
